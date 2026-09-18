@@ -1,0 +1,29 @@
+# Captures et archives d'exercice
+*.pcap
+*.pcapng
+*.zip
+*.7z
+*.gz
+
+# Artefacts potentiellement malveillants
+*.exe
+*.dll
+*.ps1
+*.js
+*.vbs
+*.bin
+*.lnk
+
+# Sorties d'outils
+sortie-suricata/
+sortie-locale/
+eve.json
+fast.log
+stats.log
+suricata.log
+
+# Environnement local
+.venv/
+__pycache__/
+*.swp
+.DS_Store
