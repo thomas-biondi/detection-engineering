@@ -1,0 +1,13 @@
+type,valeur,role,premiere_observation_utc,confiance,commentaire
+domaine,authenticatoor.org,distribution,2025-01-22T19:45:35Z,haute,Faux site logiciel. Substitution de caractere par rapport au nom legitime attendu.
+ipv4,82.221.136.26,distribution,2025-01-22T19:45:35Z,haute,Heberge la page de distribution. Aucune fonction de commande et controle observee.
+ipv4,5.252.153.241,commande_et_controle,2025-01-22T19:45:56Z,haute,HTTP en clair port 80. Distribution des charges puis sollicitation periodique.
+ipv4,45.125.66.32,commande_et_controle,2025-01-22T19:59:46Z,haute,TLS port 2917. Nom de serveur constitue de l adresse IP. Certificat auto signe.
+ipv4,45.125.66.252,commande_et_controle,2025-01-22T20:00:14Z,haute,TLS port 443. Extension de nom de serveur absente. Certificat auto signe.
+url,http://5.252.153.241/api/file/get-file/264872,charge_etage_1,2025-01-22T19:45:56Z,haute,Ressource sollicitee par le moniker scriptlet du fichier initial.
+url,http://5.252.153.241/api/file/get-file/29842.ps1,charge_etage_2,2025-01-22T19:45:58Z,haute,Charge PowerShell obfusquee. Boucle de sollicitation et execution du retour.
+url,http://5.252.153.241/1517096937,commande_et_controle,2025-01-22T19:45:58Z,moyenne,Chemin derive du numero de serie du volume systeme. Valeur specifique a l hote observe.
+motif_url,chemin constitue d un entier decimal sans extension,commande_et_controle,2025-01-22T19:45:58Z,moyenne,Motif generalise. Sollicitation a intervalle de 5 secondes.
+chemin_disque,C:\ProgramData\huo,persistance,2025-01-22T19:47:01Z,haute,Repertoire de depot des binaires d administration a distance detournes.
+fichier,TeamViewer.lnk,persistance,2025-01-22T19:47:01Z,haute,Raccourci cree dans le repertoire de demarrage du profil utilisateur.
+port,2917/tcp,commande_et_controle,2025-01-22T19:59:46Z,moyenne,TLS sur port non standard. Critere a recouper avec l absence de resolution DNS.
