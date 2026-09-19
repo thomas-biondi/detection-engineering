@@ -1,0 +1,12 @@
+type,valeur,role,premiere_observation_utc,confiance,commentaire
+ipv4,194.180.191.64,commande_et_controle,2024-11-26T04:50:45Z,haute,HTTP en clair sur port 443. Requetes POST periodiques.
+url,http://194.180.191.64/fakeurl.htm,commande_et_controle,2024-11-26T04:50:45Z,haute,Ressource sollicitee en POST. Environ 50 occurrences sur la periode.
+url,http://194.180.191.64/loca.asp,commande_et_controle,2024-11-26T04:50:45Z,moyenne,Ressource complementaire du meme hote.
+url,http://194.180.191.64/ProcessMAU.txt,commande_et_controle,2024-11-26T04:50:45Z,moyenne,Ressource complementaire du meme hote.
+domaine,modandcrackedapk.com,distribution,2024-11-26T04:50:14Z,haute,Sert la fausse mise a jour de navigateur. Domaine de campagne.
+ipv4,193.42.38.139,distribution,2024-11-26T04:50:14Z,haute,Resolution du domaine de distribution. Environ 11 Mo echanges.
+domaine,classicgrand.com,site_compromis,2024-11-26T04:50:11Z,haute,Site legitime porteur d un script injecte. Ne pas bloquer de maniere permanente. Notifier le proprietaire.
+ipv4,213.246.109.5,site_compromis,2024-11-26T04:50:11Z,haute,Resolution du site compromis. Hote non malveillant.
+domaine,geo.netsupportsoftware.com,telemetrie_outil,2024-11-26T04:50:45Z,moyenne,Service de geolocalisation de l editeur. Sollicite au demarrage du client. Etablit la famille de l outil. Domaine legitime.
+motif_reseau,HTTP en clair sur port 443,commande_et_controle,2024-11-26T04:50:45Z,moyenne,Ecart entre le port et le protocole effectif. Motif generalisable.
+motif_url,POST vers /fakeurl.htm,commande_et_controle,2024-11-26T04:50:45Z,moyenne,Ressource caracteristique de la famille NetSupport.
