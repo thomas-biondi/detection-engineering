@@ -127,18 +127,46 @@ Deux éléments d'une session TLS circulent en clair avant l'établissement du c
 | Nom de serveur demandé | `tls.handshake.extensions_server_name` | Destination réelle d'une session chiffrée |
 | Certificat serveur | `tls.handshake.type == 11` | Émetteur, sujet, validité, caractère auto-signé |
 
-### Pivot et inventaire
+### Inventaire puis pivot, dans cet ordre
 
-Deux mouvements complémentaires, dont l'un ne remplace pas l'autre.
+Deux mouvements complémentaires, dont l'un ne remplace pas l'autre. L'inventaire précède
+le pivot.
 
 | Mouvement | Principe | Portée |
 | --- | --- | --- |
+| Inventaire | Lire la liste complète et dédoublonnée des domaines interrogés, des noms de serveur TLS et des objets HTTP | Fait apparaître ce qui n'était pas soupçonné |
 | Pivot | Partir d'un indicateur connu pour en obtenir un autre, par exemple `dns.a == <ip suspecte>` | Confirme et étend une piste existante |
-| Inventaire | Lire la liste complète et dédoublonnée des domaines interrogés et des noms de serveur TLS | Fait apparaître ce qui n'était pas soupçonné |
 
-> Le pivot est borné par ce que l'analyste connaît déjà. Les éléments d'une chaîne
-> d'infection hébergés derrière un service de distribution de contenu présentent des
-> adresses IP banales et ne sont atteints que par l'inventaire.
+> Le pivot est borné par ce que l'analyste connaît déjà. Un site légitime compromis, ou
+> un élément hébergé derrière un service de distribution de contenu, présente une adresse
+> banale et n'est atteint que par l'inventaire.
+
+L'inventaire des objets HTTP se lit intégralement, y compris ses lignes apparemment
+banales. Un outil détourné sollicite fréquemment des domaines légitimes de son propre
+éditeur, ce qui permet d'établir sa famille sans recours à une signature.
+
+### Qualification par la position dans la séquence
+
+Certains éléments d'une chaîne ne présentent aucune caractéristique propre permettant de
+les qualifier. Ils ne se qualifient que par leur position temporelle.
+
+| Situation | Critère de qualification |
+| --- | --- |
+| Deux résolutions DNS séparées de quelques secondes | Intervalle incompatible avec une saisie manuelle, donc enchaînement provoqué par le contenu de la première page |
+| Trafic en clair disponible | En-tête `Referer`, qui documente le lien explicitement |
+| Trafic chiffré | Corrélation temporelle seule, à annoncer comme telle dans le rapport |
+
+> La chronologie n'est pas une mise en forme du rapport. C'est un instrument d'analyse.
+> Face à un élément suspect, examiner systématiquement ce qui le précède et le suit de
+> quelques secondes.
+
+### Écart entre port et protocole
+
+Le protocole effectivement transporté se constate, il ne se déduit pas du numéro de port.
+
+> Du texte clair sur un port réservé au chiffrement, ou l'inverse, constitue un
+> indicateur en lui même. Le choix vise un filtrage autorisant le port sans inspecter son
+> contenu.
 
 ### Exploitation des sorties structurées
 
@@ -162,3 +190,20 @@ reconstitution a posteriori ne conserve pas le cheminement.
 Convention d'horodatage : UTC, mention explicite en tête de document. Les outils
 n'appliquent pas tous le même réglage d'affichage par défaut, un écart entre deux
 sorties est à vérifier avant publication.
+
+### Liste de contrôle avant de quitter la capture
+
+| Point | Vérification |
+| --- | --- |
+| Horodatages | Premier et dernier contact relevés pour chaque hôte malveillant identifié |
+| Rôles | Site compromis, distribution et commande et contrôle distingués et justifiés |
+| Affirmations | Chaque conclusion rattachée à une observation, les déductions annoncées comme telles |
+| Volumes | Distinction entre maintien de session et exfiltration établie sur les volumes observés, non sur la nature de l'outil |
+| Empreintes | Extraction tentée, absence justifiée le cas échéant |
+| Limites | Périmètre temporel et périmètre réseau de la capture explicités |
+
+> L'affirmation d'une exfiltration engage des obligations de notification. Elle suppose
+> une observation de volume ou de contenu.
+
+> Une section vide et justifiée constitue un résultat. L'absence de preuve extractible
+> est une information à consigner.
