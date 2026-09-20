@@ -1,0 +1,22 @@
+type,valeur,role,premiere_observation_utc,confiance,commentaire
+domaine,event-time-microsoft.org,distribution,2025-06-13T15:35:48Z,haute,Sert le script de premier etage. Construction imitant celle d un editeur connu.
+domaine,eventdata-microsoft.live,commande_et_controle,2025-06-13T15:35:58Z,haute,Premier contact. Recoit le resultat du recensement systeme.
+domaine,event-datamicrosoft.live,commande_et_controle,2025-06-13T15:37:25Z,haute,Sollicitations periodiques a chemin variable.
+domaine,varying-rentals-calgary-predict.trycloudflare.com,commande_et_controle,2025-06-13T15:37:25Z,haute,Sous domaine de service de tunnel ephemere gratuit. Anomalie a tres faible taux de faux positifs en entreprise.
+ipv4,104.21.24.186,infrastructure_mutualisee,2025-06-13T15:35:48Z,faible,Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer.
+ipv4,104.21.112.1,infrastructure_mutualisee,2025-06-13T15:35:58Z,faible,Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer.
+ipv4,104.21.16.1,infrastructure_mutualisee,2025-06-13T15:37:25Z,faible,Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer.
+ipv4,104.16.230.132,infrastructure_mutualisee,2025-06-13T15:37:25Z,faible,Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer.
+sha256,d13971294a836862ffaf212c6f6aa8bea3818aab28120ec3b9bffa181ce0d429,charge_etage_1,2025-06-13T15:35:48Z,haute,Script PowerShell obfusque en base64. Extrait de la capture. Indicateur precis mais peu durable.
+url,/zh0GPFZdKt,charge_etage_1,2025-06-13T15:35:48Z,haute,Ressource servie par event-time-microsoft.org en HTTP clair.
+url,/NV4RgNeU,commande_et_controle,2025-06-13T15:35:58Z,haute,Premiere requete POST vers eventdata-microsoft.live.
+motif_url,POST vers chemin variable d apparence aleatoire,commande_et_controle,2025-06-13T15:37:25Z,moyenne,Chemins non fixes. Le motif exploitable est la periodicite et la structure des chemins.
+motif_domaine,sous domaine de service de tunnel ephemere,commande_et_controle,2025-06-13T15:37:25Z,moyenne,Motif generalisable. Aucun usage professionnel courant ne repose sur ces noms generes.
+domaine,truglomedspa.com,site_compromis,2025-06-13T15:35:00Z,haute,Site legitime porteur d un script injecte. Ne pas bloquer de maniere permanente. Notifier le proprietaire.
+fichier,5h7o.js,script_injecte,2025-06-13T15:35:00Z,haute,Affiche la fausse page de verification humaine. Technique ClickFix.
+fichier,ycBFVIbLl.lnk,persistance,2025-06-13T15:37:00Z,haute,Raccourci cree dans le repertoire de demarrage du profil utilisateur.
+fichier,c2.exe,persistance,2025-06-13T15:37:00Z,haute,Programme declenche par le raccourci de demarrage.
+chemin_disque,AppData\Roaming\php,persistance,2025-06-13T15:36:00Z,haute,Environnement d execution PHP deploye dans le profil utilisateur.
+domaine,windows.php.net,outil_detourne,2025-06-13T15:36:00Z,haute,Site officiel de l editeur. Legitime. Ne pas traiter comme indicateur de compromission.
+ipv4,83.137.149.15,outil_detourne,2025-06-13T15:36:00Z,haute,Resolution du site de l editeur. Environ 34 Mo transferes. Legitime.
+motif_comportemental,telechargement d un environnement d execution par un poste bureautique,deploiement_outil,2025-06-13T15:36:00Z,moyenne,Motif generalisable. Independant de l origine du telechargement.
