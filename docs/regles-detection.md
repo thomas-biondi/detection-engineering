@@ -111,14 +111,39 @@ Formulation de contournement validée sur les événements structurés :
 jq -r 'select(.event_type=="tls" and (.tls.sni | not)) | "\(.timestamp) \(.dest_ip):\(.dest_port)"' eve.json
 ```
 
+## Hiérarchie des indicateurs
+
+Le coût de contournement d'un indicateur pour l'attaquant détermine sa durée de vie
+utile. Le modèle de référence est la pyramide de la douleur.
+
+| Indicateur | Coût de contournement | Emploi en détection |
+| --- | --- | --- |
+| Empreinte de fichier | Trivial | Consigner, ne pas fonder une détection dessus |
+| Adresse IP | Faible | Inexploitable si l'adresse relève d'une infrastructure mutualisée |
+| Nom de domaine | Modéré | Actionnable, à privilégier sur l'adresse |
+| Artefact réseau ou système | Élevé | Base des règles locales |
+| Technique, comportement | Très élevé | Objectif à atteindre |
+
+> Une adresse appartenant à un réseau de distribution de contenu est mutualisée entre un
+> très grand nombre de sites légitimes. Son blocage au niveau du pare feu interrompt des
+> services sans rapport avec l'incident. L'indicateur actionnable est alors le domaine.
+
 ## Pistes non traitées
 
-| Piste | Nature de l'anomalie | Moteur pertinent |
-| --- | --- | --- |
-| Requêtes répétées à intervalle fixe vers un même chemin | Régularité temporelle | SIEM |
-| Certificat serveur auto signé | Comparaison entre deux champs du certificat | Suricata avec extension, ou SIEM |
-| Session TLS vers une adresse jamais résolue par DNS | Corrélation entre deux protocoles | SIEM |
+| Piste | Nature de l'anomalie | Moteur pertinent | Origine |
+| --- | --- | --- | --- |
+| Sous domaine de service de tunnel éphémère | Motif sur le nom sollicité | Suricata | Session 03 |
+| Requêtes répétées à intervalle fixe | Régularité temporelle | SIEM | Session 01 |
+| Certificat serveur auto signé | Comparaison entre deux champs du certificat | Suricata avec extension, ou SIEM | Session 01 |
+| Session TLS vers une adresse jamais résolue par DNS | Corrélation entre deux protocoles | SIEM | Session 01 |
+| HTTP en clair sur port réservé au chiffrement | Écart entre port et protocole décodé | Suricata | Session 02 |
+| Téléchargement d'un environnement d'exécution par un poste bureautique | Motif sur la ressource sollicitée | Suricata | Session 03 |
 
-Ces trois pistes ne s'expriment pas sur un paquet isolé. Elles supposent une corrélation
-temporelle ou un croisement entre protocoles, et relèvent de l'ingestion des événements
-structurés par le SIEM.
+La première piste est la plus immédiatement réalisable en signature : elle s'exprime sur
+un champ unique, le nom sollicité en DNS ou en TLS, et le taux de faux positifs attendu
+est très faible en environnement d'entreprise. Elle constitue la prochaine règle locale à
+écrire.
+
+Les pistes de régularité temporelle, de non présence de champ et de corrélation entre
+protocoles ne s'expriment pas sur un paquet isolé. Elles relèvent de l'ingestion des
+événements structurés par le SIEM.
