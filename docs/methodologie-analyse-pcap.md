@@ -160,6 +160,33 @@ les qualifier. Ils ne se qualifient que par leur position temporelle.
 > Face à un élément suspect, examiner systématiquement ce qui le précède et le suit de
 > quelques secondes.
 
+### Qualification d'un flux volumineux
+
+Le volume échangé avec un hôte ne constitue pas un critère de qualification. La
+vérification du nom présenté précède toute conclusion.
+
+| Observation | Vérification préalable |
+| --- | --- |
+| Transfert de volume inhabituel | Nom de serveur de la session TLS, ou en-tête `Host` en clair |
+| Origine identifiée comme légitime | Le flux n'est pas pour autant anodin |
+
+> Le critère pertinent n'est ni la taille du transfert ni la réputation de son origine,
+> mais l'absence de justification fonctionnelle. Un poste bureautique n'a aucune raison
+> de télécharger un environnement d'exécution, même depuis le site de son éditeur.
+
+### Vecteurs ne faisant transiter aucun fichier
+
+Certaines chaînes ne comportent aucune pièce jointe et n'exploitent aucune
+vulnérabilité. La commande initiale est saisie par l'utilisateur, à qui une page affiche
+une séquence de touches présentée comme une étape de validation.
+
+> La chaîne ne devient observable qu'à partir de la première requête sortante émise par
+> le code exécuté. En amont, seule la consultation du site compromis figure dans le
+> trafic, sans caractéristique distinctive.
+
+Le trafic réseau ne suffit pas à établir ce vecteur. L'examen du cache du navigateur
+permet de retrouver le script injecté et le site qui l'a servi.
+
 ### Écart entre port et protocole
 
 Le protocole effectivement transporté se constate, il ne se déduit pas du numéro de port.
