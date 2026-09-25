@@ -57,6 +57,11 @@ ultérieurs.
 
 Objectif : déterminer quelle machine est concernée, puis établir son identité complète.
 
+Lorsque l'analyse part d'une alerte, le point d'entrée est l'adresse signalée : l'hôte
+interne en communication avec elle désigne la machine concernée. L'inventaire des points
+de terminaison sert alors à vérifier qu'aucun autre hôte n'a communiqué avec la même
+adresse.
+
 `Statistics` puis `Endpoints`, onglet IPv4, tri par nombre de paquets décroissant.
 
 Contrôle à effectuer systématiquement : comparer le total de la machine la plus active
@@ -74,6 +79,12 @@ suivant. Trois compléments sont à extraire.
 
 Sur le filtre Kerberos, les valeurs terminées par le caractère `$` désignent des comptes
 machine. La valeur sans ce suffixe désigne le compte utilisateur.
+
+Le nom complet de l'utilisateur se trouve dans le trafic LDAP vers le contrôleur de
+domaine, filtre `ldap.AttributeDescription == "givenName"`. En l'absence de ce trafic
+dans la fenêtre de capture, une recherche de chaîne sensible à la casse dans le détail
+des paquets, construite à partir du format du compte, permet souvent de le retrouver.
+Menu `Édition` puis `Rechercher un paquet`, portée sur le détail des paquets, type chaîne.
 
 > L'adresse MAC n'est exploitable que si la capture a été réalisée sur le même segment
 > que la machine observée. Au franchissement du premier routeur, l'adresse source est
@@ -231,6 +242,13 @@ sorties est à vérifier avant publication.
 
 > L'affirmation d'une exfiltration engage des obligations de notification. Elle suppose
 > une observation de volume ou de contenu.
+
+> La conclusion analytique énonce ce qui est démontré. La posture de réponse se fonde sur
+> le scénario le plus défavorable plausible. Un rapport expose les deux séparément : une
+> exfiltration non démontrée n'autorise pas à omettre la réinitialisation des accès.
+
+> Une analyse de référence se confronte à la capture comme toute autre source. Elle ne
+> constitue pas une autorité.
 
 > Une section vide et justifiée constitue un résultat. L'absence de preuve extractible
 > est une information à consigner.
