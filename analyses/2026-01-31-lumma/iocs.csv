@@ -1,0 +1,12 @@
+type,valeur,role,premiere_observation_utc,confiance,commentaire
+domaine,whitepepper.su,commande_et_controle,2026-01-27T23:05:36Z,haute,Commande et controle Lumma Stealer. HTTP clair port 80.
+ipv4,153.92.1.49,commande_et_controle,2026-01-27T23:05:36Z,haute,Adresse a l origine de l alerte de detection.
+url,/api/set_agent?id=...&agent=Chrome,commande_et_controle,2026-01-27T23:05:36Z,haute,Declaration de l implant. Navigateur cible Chrome.
+url,/api/set_agent?id=...&agent=Edge,commande_et_controle,2026-01-27T23:05:36Z,haute,Declaration de l implant. Navigateur cible Edge.
+url,/api/set_agent?...&act=log,exfiltration,2026-01-27T23:05:36Z,haute,Transmission de l empreinte materielle en clair. Environ 8 Ko par requete.
+motif_url,/api/set_agent en HTTP clair,commande_et_controle,2026-01-27T23:05:36Z,moyenne,Motif d enregistrement et de transmission. Deja couvert par le jeu public.
+domaine,arch.filemegahab4.sbs,distribution,2026-01-27T23:04:52Z,haute,Site de partage de fichiers. Fichier initial d environ 17 Mo.
+ipv4,104.21.46.67,infrastructure_mutualisee,2026-01-27T23:04:52Z,faible,Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer.
+domaine,holiday-forever.cc,activite_consecutive,2026-01-27T23:06:00Z,moyenne,Session TLS apres la fin des echanges avec le C2. Lien causal non etabli.
+domaine,communicationfirewall-security.cc,activite_consecutive,2026-01-27T23:06:00Z,moyenne,Session TLS apres la fin des echanges avec le C2. Lien causal non etabli.
+motif_fichier,<adresse publique>-<identifiant hexadecimal>.zip,exfiltration,2026-01-27T23:05:36Z,moyenne,Format de nommage de l archive de donnees collectees tel que revele par une reponse du serveur.
