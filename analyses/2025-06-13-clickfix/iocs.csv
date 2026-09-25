@@ -3,10 +3,10 @@ domaine,event-time-microsoft.org,distribution,2025-06-13T15:35:48Z,haute,Sert le
 domaine,eventdata-microsoft.live,commande_et_controle,2025-06-13T15:35:58Z,haute,Premier contact. Recoit le resultat du recensement systeme.
 domaine,event-datamicrosoft.live,commande_et_controle,2025-06-13T15:37:25Z,haute,Sollicitations periodiques a chemin variable.
 domaine,varying-rentals-calgary-predict.trycloudflare.com,commande_et_controle,2025-06-13T15:37:25Z,haute,Sous domaine de service de tunnel ephemere gratuit. Anomalie a tres faible taux de faux positifs en entreprise.
-ipv4,104.21.24.186,infrastructure_mutualisee,2025-06-13T15:35:48Z,faible,Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer.
-ipv4,104.21.112.1,infrastructure_mutualisee,2025-06-13T15:35:58Z,faible,Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer.
-ipv4,104.21.16.1,infrastructure_mutualisee,2025-06-13T15:37:25Z,faible,Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer.
-ipv4,104.16.230.132,infrastructure_mutualisee,2025-06-13T15:37:25Z,faible,Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer.
+ipv4,104.21.24.186,infrastructure_mutualisee,2025-06-13T15:35:48Z,faible,"Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer."
+ipv4,104.21.112.1,infrastructure_mutualisee,2025-06-13T15:35:58Z,faible,"Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer."
+ipv4,104.21.16.1,infrastructure_mutualisee,2025-06-13T15:37:25Z,faible,"Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer."
+ipv4,104.16.230.132,infrastructure_mutualisee,2025-06-13T15:37:25Z,faible,"Reseau de distribution de contenu. Observee, non actionnable. Ne pas bloquer."
 sha256,d13971294a836862ffaf212c6f6aa8bea3818aab28120ec3b9bffa181ce0d429,charge_etage_1,2025-06-13T15:35:48Z,haute,Script PowerShell obfusque en base64. Extrait de la capture. Indicateur precis mais peu durable.
 url,/zh0GPFZdKt,charge_etage_1,2025-06-13T15:35:48Z,haute,Ressource servie par event-time-microsoft.org en HTTP clair.
 url,/NV4RgNeU,commande_et_controle,2025-06-13T15:35:58Z,haute,Premiere requete POST vers eventdata-microsoft.live.
