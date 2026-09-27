@@ -1,0 +1,5 @@
+type,valeur,role,premiere_observation_utc,confiance,commentaire
+domaine,vadusa.xyz,commande_et_controle,2026-02-28T19:55:51Z,haute,Passerelle NetSupport configuree dans l'implant. Resolue une seule fois sur la periode.
+ipv4,45.131.214.85,commande_et_controle,2026-02-28T19:55:51Z,haute,"Adresse a l'origine des alertes. Hebergeur MHost LLC, Allemagne, selon consultation de reputation."
+url,http://45.131.214.85/fakeurl.htm,commande_et_controle,2026-02-28T19:55:51Z,haute,Requetes POST en HTTP clair sur le port 443. Environ une requete par minute. Dernier contact 2026-03-01T00:16:28Z.
+motif_reseau,HTTP en clair sur port 443 avec POST /fakeurl.htm,commande_et_controle,2026-02-28T19:55:51Z,haute,Artefact NetSupport identique a celui observe le 2024-11-26 sur une campagne distincte. Stable entre campagnes.
