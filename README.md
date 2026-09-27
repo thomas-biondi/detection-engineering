@@ -55,6 +55,7 @@ valeurs sensibles sont remplacées par des marqueurs et la méthode est décrite
 | 2026-09-19 | 02 | Analyse en autonomie, rapport d'incident complet, infection par outil d'administration à distance détourné |
 | 2026-09-20 | 03 | Vecteur sans transit de fichier, emploi d'un interpréteur légitime, premier constat transverse consolidé |
 | 2026-09-25 | 04 | Analyse partant d'une alerte, voleur d'informations, révision du constat transverse |
+| 2026-09-27 | 05 | Implant préexistant à la collecte, limite de l'adjacence temporelle, artefact stable entre campagnes |
 
 ## Dossiers d'analyse
 
@@ -64,3 +65,4 @@ valeurs sensibles sont remplacées par des marqueurs et la méthode est décrite
 | `analyses/2024-11-26-nemotodes/` | Site légitime compromis, fausse mise à jour de navigateur, NetSupport RAT | Rapport d'incident, indicateurs |
 | `analyses/2025-06-13-clickfix/` | Technique ClickFix, déploiement d'un interpréteur PHP officiel, persistance par raccourci de démarrage | Rapport d'incident, indicateurs |
 | `analyses/2026-01-31-lumma/` | Voleur d'informations Lumma Stealer, exfiltration tentée et non démontrée, activité consécutive | Rapport d'incident, indicateurs |
+| `analyses/2026-02-28-easyas123/` | NetSupport Manager installé avant la collecte, vecteur absent de la capture | Rapport d'incident, indicateurs |
