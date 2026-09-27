@@ -80,11 +80,20 @@ suivant. Trois compléments sont à extraire.
 Sur le filtre Kerberos, les valeurs terminées par le caractère `$` désignent des comptes
 machine. La valeur sans ce suffixe désigne le compte utilisateur.
 
-Le nom complet de l'utilisateur se trouve dans le trafic LDAP vers le contrôleur de
-domaine, filtre `ldap.AttributeDescription == "givenName"`. En l'absence de ce trafic
-dans la fenêtre de capture, une recherche de chaîne sensible à la casse dans le détail
-des paquets, construite à partir du format du compte, permet souvent de le retrouver.
-Menu `Édition` puis `Rechercher un paquet`, portée sur le détail des paquets, type chaîne.
+Le nom complet de l'utilisateur se trouve dans le trafic vers le contrôleur de domaine.
+
+| Source | Filtre |
+| --- | --- |
+| LDAP | `ldap.AttributeDescription == "givenName"` |
+| SAMR, interface de gestion des comptes, en DCE/RPC sur SMB | `samr` |
+| À défaut | Recherche de chaîne sensible à la casse dans le détail des paquets, construite à partir du format du compte |
+
+La recherche de chaîne s'effectue par le menu `Édition` puis `Rechercher un paquet`,
+portée sur le détail des paquets, type chaîne.
+
+Le nom d'hôte figure en priorité dans l'option 12 du bail DHCP, source la plus fiable
+lorsque la transaction est présente dans la capture. L'enregistrement NetBIOS constitue
+une source de repli.
 
 > L'adresse MAC n'est exploitable que si la capture a été réalisée sur le même segment
 > que la machine observée. Au franchissement du premier routeur, l'adresse source est
@@ -171,6 +180,33 @@ les qualifier. Ils ne se qualifient que par leur position temporelle.
 > Face à un élément suspect, examiner systématiquement ce qui le précède et le suit de
 > quelques secondes.
 
+Une adjacence ne suffit pas. Elle doit être accompagnée d'un mécanisme plausible reliant
+les deux événements.
+
+| Question de validation | Si la réponse est non |
+| --- | --- |
+| Une étape de distribution existe elle entre les deux événements ? | Pas de chaîne établie |
+| Le délai est il compatible avec un téléchargement suivi d'une exécution ? | Simultanéité probable |
+| Le second événement est il un premier démarrage, ou le fonctionnement d'un implant déjà en place ? | L'infection est antérieure |
+
+> Une ouverture de session déclenche au même instant les programmes de démarrage et la
+> réouverture du navigateur. Deux événements simultanés à cet instant n'ont pas
+> nécessairement de lien. L'horodatage de l'authentification Kerberos du compte permet de
+> vérifier cette hypothèse.
+
+### Capture postérieure à l'infection
+
+Une capture déclenchée par une alerte commence au moment de l'alerte. Si le premier
+contact avec le serveur de contrôle correspond au fonctionnement d'un implant déjà
+opérationnel, sans téléchargement préalable, l'infection est antérieure à la collecte.
+Le vecteur initial est alors absent du trafic, et la recherche rétroactive doit être
+étendue en amont.
+
+Lorsque la capture couvre le démarrage du poste, la séquence transaction DHCP,
+authentification Kerberos, premier contact avec le serveur de contrôle se lit
+directement. Un implant qui s'active après ouverture de session sans téléchargement
+préalable établit l'existence d'un mécanisme de persistance, sans en révéler la nature.
+
 ### Qualification d'un flux volumineux
 
 Le volume échangé avec un hôte ne constitue pas un critère de qualification. La
@@ -229,6 +265,24 @@ Convention d'horodatage : UTC, mention explicite en tête de document. Les outil
 n'appliquent pas tous le même réglage d'affichage par défaut, un écart entre deux
 sorties est à vérifier avant publication.
 
+### Degré d'affirmation
+
+| Terme | Emploi |
+| --- | --- |
+| Établi | La capture montre directement le fait |
+| Corroboré | Une observation indépendante soutient l'hypothèse |
+| Compatible | Aucune observation ne contredit l'hypothèse, aucune ne la soutient spécifiquement |
+| Hypothèse | Interprétation plausible, non vérifiée |
+
+> Un rapport d'incident peut être relu par un juriste, un assureur ou un auditeur. Les
+> termes absolus, irréfutable ou certain, n'y ont pas leur place.
+
+### Contrôle de cohérence des relevés
+
+Les valeurs relevées se recoupent entre elles : nombre de paquets, durée, fréquence des
+échanges, volume. Un écart significatif signale une erreur de relevé ou un comportement
+non encore compris.
+
 ### Liste de contrôle avant de quitter la capture
 
 | Point | Vérification |
@@ -238,6 +292,7 @@ sorties est à vérifier avant publication.
 | Affirmations | Chaque conclusion rattachée à une observation, les déductions annoncées comme telles |
 | Volumes | Distinction entre maintien de session et exfiltration établie sur les volumes observés, non sur la nature de l'outil |
 | Empreintes | Extraction tentée, absence justifiée le cas échéant |
+| Enrichissement externe | Source et date de consultation consignées. Aucun fichier issu d'un incident réel soumis à un service public |
 | Limites | Périmètre temporel et périmètre réseau de la capture explicités |
 
 > L'affirmation d'une exfiltration engage des obligations de notification. Elle suppose
