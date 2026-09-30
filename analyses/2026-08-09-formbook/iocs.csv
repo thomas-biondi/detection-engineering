@@ -1,0 +1,10 @@
+type,valeur,role,premiere_observation_utc,confiance,commentaire
+domaine,www.grinswakebthu.info,commande_et_controle,<date>T02:13:28Z,haute,"Serveur de controle. Recoit les requetes POST de transmission de donnees, absentes vers les leurres."
+domaine,www.taibeinan.cc,commande_et_controle,<date>T02:13:28Z,haute,"Serveur de controle. Recoit les requetes POST de transmission de donnees, absentes vers les leurres."
+ipv4,146.59.71.167,destination_signalee,<date>T02:14:00Z,faible,Alerte FormBook CnC Checkin. Leurre ou controle selon le domaine associe. Ne pas bloquer sans verification.
+ipv4,38.182.168.246,destination_signalee,<date>T02:14:00Z,faible,Alerte FormBook CnC Checkin. Leurre ou controle selon le domaine associe. Ne pas bloquer sans verification.
+ipv4,45.130.41.161,destination_signalee,<date>T02:15:00Z,faible,Alerte FormBook CnC Checkin. Leurre ou controle selon le domaine associe. Ne pas bloquer sans verification.
+ipv4,121.54.163.148,destination_signalee,<date>T02:16:00Z,faible,Alerte FormBook CnC Checkin. Leurre ou controle selon le domaine associe. Ne pas bloquer sans verification.
+ipv4,172.64.155.76,leurre,<date>T02:13:00Z,faible,Leurre. Reponses 301 ou 404. Reseau de distribution de contenu. Non malveillant. Ne pas bloquer.
+ipv4,172.67.162.153,infrastructure_mutualisee,<date>T02:15:00Z,faible,Reseau de distribution de contenu. Non actionnable. Ne pas bloquer.
+motif_comportemental,requetes HTTP a chemin court aleatoire vers de multiples domaines,commande_et_controle,<date>T02:13:28Z,moyenne,Exemples /ujvq/ et /1rpm/. Meme structure vers controle et leurres.
