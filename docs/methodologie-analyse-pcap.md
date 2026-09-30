@@ -1,309 +1,183 @@
-# Méthodologie de triage d'une capture réseau
+# Rapport d'incident. Infection par voleur d'informations FormBook
 
-Document de référence. Décrit la séquence appliquée à toute capture inconnue, avant
-toute recherche ciblée.
+Source de la capture : exercice public malware-traffic-analysis.net du 9 août 2026.
+Capture non versionnée, disponible auprès de l'éditeur. Aucune analyse de référence
+n'était publiée au moment de la rédaction : les constats de ce document n'ont pas été
+confrontés à une source externe.
 
-## Principe
+Tous les horodatages de ce document sont exprimés en UTC.
 
-Une capture ne s'explore pas à la recherche de l'anomalie. L'anomalie ne se distingue
-que par rapport à un état normal, lequel doit être établi en premier. La séquence
-ci-dessous construit d'abord une carte du terrain, identifie les acteurs, fixe le
-référentiel temporel, et ne descend au niveau du paquet qu'en dernier.
+## Résumé exécutif
 
-> Une observation isolée n'a pas de valeur. Une observation rapportée à un contexte
-> connu en a une.
+Vers 02h13 UTC, des alertes de détection ont signalé les communications caractéristiques
+de FormBook, un logiciel malveillant spécialisé dans le vol d'informations, depuis un
+poste de travail Windows du réseau.
 
-## Séquence
+L'analyse du trafic identifie le poste et son utilisateur. Le logiciel s'est manifesté
+un peu plus de cinq minutes après l'ouverture de session de l'utilisateur, puis a
+communiqué de façon soutenue avec un ensemble de serveurs distants. Une partie de ces
+serveurs sont des leurres, sollicités par le logiciel pour masquer ses véritables
+destinations.
 
-### Temps 1. Contexte fourni
+La manière dont le poste a été infecté n'est pas établie. Le scénario le plus probable
+est une infection antérieure à la période observée, le logiciel se réactivant à
+l'ouverture de session : aucune communication avec un service de messagerie ou un
+hébergeur de fichiers n'a précédé sa première manifestation. Ce scénario n'est toutefois
+pas démontré, l'ouverture d'un fichier déjà présent sur le poste ne produisant aucun
+trafic.
 
-Relever avant toute commande les éléments de cadrage disponibles : plage du segment,
-domaine Active Directory, adresse du contrôleur de domaine, passerelle, adresse de
-diffusion. Ces éléments déterminent ce qui relève du fonctionnement normal et ce qui
-constitue un écart.
+Ce type de logiciel capture les informations saisies par l'utilisateur, notamment les
+identifiants entrés dans les formulaires et les navigateurs. L'ensemble des comptes
+utilisés depuis ce poste doit être considéré comme compromis.
 
-### Temps 2. Métadonnées du fichier
+## Cadrage
 
-Un fichier de capture comporte deux couches d'information dont le coût de lecture
-diffère.
+| Élément | Valeur |
+| --- | --- |
+| Segment | 172.16.8.0/24 |
+| Passerelle | 172.16.8.1 |
+| Contrôleur de domaine | 172.16.8.2, FIRSTTOLAST-DC |
+| Domaine Active Directory | FIRSTTOLAST, firsttolast.tech |
+| Alertes d'origine | ET MALWARE FormBook CnC Checkin (GET), six destinations entre 02:13 et 02:16 |
+| Volume de la capture | `<à compléter, capinfos>` |
+| Fenêtre couverte | `<à compléter, capinfos>` |
 
-| Couche | Contenu | Coût de lecture |
+La capture contient le trafic de plusieurs hôtes internes, contrairement aux analyses
+précédentes du dépôt.
+
+## Détails de la victime
+
+| Élément | Valeur | Source |
 | --- | --- | --- |
-| Métadonnées | Nombre de paquets, bornes temporelles, débit moyen | Immédiat |
-| Contenu | Octets des trames, à dissocier par dissecteur | Proportionnel au volume |
+| Adresse IP | 172.16.8.49 | Seul hôte interne en communication avec les destinations signalées, vérifié par filtrage |
+| Adresse MAC | 00:12:f0:28:d4:34 | Couche Ethernet |
+| Nom d'hôte | DESKTOP-5NLV63K | Résolution DNS inverse, corroborée par le compte machine Kerberos `desktop-5nlv63k$` |
+| Compte utilisateur | rvance | Principal de la requête d'authentification Kerberos |
+| Nom complet | Raymond Vance | `<source à préciser>` |
 
-```bash
-capinfos -a -e -c -x capture.pcap
-```
+Le nom obtenu par résolution inverse est celui enregistré dans le DNS, susceptible d'être
+obsolète en cas de réattribution d'adresse. Le compte machine présenté par le poste dans
+ses requêtes Kerberos en constitue une corroboration indépendante.
 
-| Option | Rôle |
+Les hôtes 172.16.8.8 et 172.16.8.53 présentent un volume de trafic élevé. Ils sont
+exclus : le filtrage sur les six destinations signalées ne fait apparaître aucune
+communication de leur part.
+
+## Chronologie
+
+| Heure UTC | Événement |
 | --- | --- |
-| `-c` | Nombre de paquets |
-| `-a` | Horodatage du premier paquet |
-| `-e` | Horodatage du dernier paquet |
-| `-x` | Débit moyen |
+| 02:08:12 | Requêtes DNS de localisation du contrôleur de domaine, authentification Kerberos du compte machine puis du compte `rvance`, ouverture de session |
+| 02:08:12 à 02:13:28 | Aucune communication attribuable au logiciel malveillant. Sessions TLS limitées à des services système, aucun service de messagerie ni hébergeur de fichiers identifié |
+| 02:13:28 | Début des requêtes HTTP à chemins aléatoires, par exemple `/ujvq/` et `/1rpm/` |
+| 02:13 à 02:16 | Six alertes de détection sur six destinations distinctes |
+| Minutes suivantes | Poursuite des alertes du même type |
 
-La volumétrie détermine la stratégie d'analyse.
+## Analyse
 
-| Volume | Approche |
-| --- | --- |
-| Inférieur à quelques centaines de milliers de paquets | Exploration visuelle sous Wireshark |
-| Au delà | Filtrage préalable en ligne de commande, `tshark` et Zeek |
+### Intervalle entre l'ouverture de session et la première communication
 
-Le premier horodatage constitue le référentiel temporel de tous les événements
-ultérieurs.
+Cinq minutes et seize secondes séparent l'ouverture de session de la première
+communication du logiciel. Deux hypothèses sont compatibles avec cette observation.
 
-### Temps 3. Inventaire et identification
-
-Objectif : déterminer quelle machine est concernée, puis établir son identité complète.
-
-Lorsque l'analyse part d'une alerte, le point d'entrée est l'adresse signalée : l'hôte
-interne en communication avec elle désigne la machine concernée. L'inventaire des points
-de terminaison sert alors à vérifier qu'aucun autre hôte n'a communiqué avec la même
-adresse.
-
-`Statistics` puis `Endpoints`, onglet IPv4, tri par nombre de paquets décroissant.
-
-Contrôle à effectuer systématiquement : comparer le total de la machine la plus active
-au nombre total de paquets de la capture. Une égalité indique que la capture a été
-filtrée en amont sur cet hôte et non collectée sur l'ensemble du segment.
-
-Une adresse IP ne suffit pas à un rapport d'incident, elle est révocable au bail
-suivant. Trois compléments sont à extraire.
-
-| Élément | Source | Filtre |
+| Hypothèse | Mécanisme | Élément discriminant dans la capture |
 | --- | --- | --- |
-| Adresse MAC | Couche Ethernet d'un paquet émis par l'hôte | Aucun |
-| Nom d'hôte | Option 12 du bail DHCP, à défaut enregistrement NetBIOS | `dhcp`, `nbns` |
-| Compte utilisateur | Principal de la requête d'authentification Kerberos | `kerberos.CNameString` |
+| Infection antérieure | Programme installé, lancé à l'ouverture de session puis mis en attente avant toute communication | Absence de toute activité susceptible de livrer un fichier dans l'intervalle |
+| Infection pendant la capture | Ouverture par l'utilisateur d'un fichier reçu, par exemple une pièce jointe | Sessions TLS vers un service de messagerie ou un hébergeur de fichiers juste avant 02:13:28 |
 
-Sur le filtre Kerberos, les valeurs terminées par le caractère `$` désignent des comptes
-machine. La valeur sans ce suffixe désigne le compte utilisateur.
+Résultat de l'examen de l'intervalle. Les sessions TLS observées entre 02:08:12 et
+02:13:28 relèvent de services système. Aucune session vers un service de messagerie ou
+un hébergeur de fichiers n'est identifiée.
 
-Le nom complet de l'utilisateur se trouve dans le trafic vers le contrôleur de domaine.
+Conclusion. La première hypothèse est corroborée. Elle n'est pas établie : l'ouverture
+par l'utilisateur d'un fichier déjà présent sur le poste, reçu avant la période
+observée, ne produirait aucun trafic et donnerait une capture identique.
 
-| Source | Filtre |
-| --- | --- |
-| LDAP | `ldap.AttributeDescription == "givenName"` |
-| SAMR, interface de gestion des comptes, en DCE/RPC sur SMB | `samr` |
-| À défaut | Recherche de chaîne sensible à la casse dans le détail des paquets, construite à partir du format du compte |
+> Une recherche infructueuse renforce une hypothèse sans l'établir. Elle écarte les
+> variantes qui auraient laissé une trace, pas celles qui n'en laissent aucune.
 
-La recherche de chaîne s'effectue par le menu `Édition` puis `Rechercher un paquet`,
-portée sur le détail des paquets, type chaîne.
+La mise en attente prolongée avant toute communication est un comportement documenté de
+plusieurs familles, destiné à dépasser la durée d'observation des environnements
+d'analyse automatisée. Cette connaissance porte sur la famille et non sur la capture :
+elle rend la première hypothèse plausible sans l'établir.
 
-Le nom d'hôte figure en priorité dans l'option 12 du bail DHCP, source la plus fiable
-lorsque la transaction est présente dans la capture. L'enregistrement NetBIOS constitue
-une source de repli.
+> Une conclusion établie dans un cas précédent ne constitue pas une conclusion par défaut.
+> Le même raisonnement appliqué à une forme différente peut conduire à une conclusion
+> erronée.
 
-> L'adresse MAC n'est exploitable que si la capture a été réalisée sur le même segment
-> que la machine observée. Au franchissement du premier routeur, l'adresse source est
-> réécrite.
+### Commande et contrôle et leurres
 
-> Le nom du principal Kerberos circule en clair dans la requête initiale, avant toute
-> préauthentification. Cette propriété du protocole est exploitable en analyse, et
-> constitue par ailleurs la base des attaques de type AS-REP roasting.
+FormBook adresse des requêtes de même structure à un ensemble de domaines, dont la plupart
+sont des leurres. Ce procédé vise à noyer les véritables serveurs de contrôle parmi des
+destinations sans rapport avec l'attaquant.
 
-### Temps 4. Chronologie
+Conséquence sur la lecture des alertes. La signature de détection repose sur la structure
+des requêtes, identique pour les vrais serveurs et pour les leurres. Les six destinations
+signalées ne sont donc pas toutes des serveurs malveillants.
 
-Reconstitution ordonnée : point d'entrée, téléchargement, exécution, persistance,
-communication de commande et contrôle.
+> Une alerte de ce type qualifie l'hôte interne comme infecté. Elle ne qualifie pas la
+> destination comme malveillante.
 
-## Techniques transverses
+Deux destinations des alertes relèvent en outre d'un réseau de distribution de contenu,
+172.64.155.76 et 172.67.162.153. Elles sont mutualisées et non actionnables.
 
-### Mise en colonne d'un champ
+Distinction entre leurres et serveurs de contrôle, établie par les réponses observées.
 
-Clic droit sur un champ dans le panneau de détail, puis `Appliquer comme colonne`. Le
-champ est alimenté pour tous les paquets qui le contiennent.
+| Destination | Requêtes reçues | Réponse observée | Qualification |
+| --- | --- | --- | --- |
+| Leurres, par exemple 172.64.155.76 | GET à chemin aléatoire | `301 Moved Permanently` ou `404 Not Found` | Sites légitimes utilisés à leur insu |
+| `www.grinswakebthu.info` | GET et POST | `<code de réponse aux POST à compléter>` | Serveur de contrôle |
+| `www.taibeinan.cc` | GET et POST | `<code de réponse aux POST à compléter>` | Serveur de contrôle |
 
-> Dès qu'une valeur recherchée varie sur un grand nombre de paquets, la mise en colonne
-> remplace l'ouverture paquet par paquet.
+La réponse `301` est une redirection, non une erreur. Sur un site servi par un réseau de
+distribution de contenu, elle correspond typiquement à la redirection vers la version
+chiffrée du site, comportement ordinaire d'un site légitime. Elle confirme la nature de
+leurre de la destination.
 
-Équivalent en ligne de commande, applicable à tout champ :
+Les deux domaines de contrôle se distinguent par la réception des requêtes POST de
+transmission de données, absentes vers les leurres.
 
-```bash
-tshark -r capture.pcap -Y "<filtre>" -T fields -e <champ> | sort -u
-```
+Des requêtes vers `www.independent.ie`, site d'information légitime, figurent dans le
+trafic. Si leur structure de chemin est identique à celle des autres requêtes du logiciel,
+le site est une cible de leurre, utilisée sans avoir été compromise. Dans le cas
+contraire, il s'agit de navigation de l'utilisateur. Dans les deux cas, il ne constitue
+pas un indicateur de compromission.
 
-| Option | Rôle |
-| --- | --- |
-| `-r` | Lecture depuis un fichier |
-| `-Y` | Filtre d'affichage, syntaxe identique à celle de Wireshark |
-| `-T fields -e` | Extraction du champ désigné au lieu du résumé de paquet |
+## Indicateurs de compromission
 
-### Priorité au trafic non chiffré
+Export exploitable : `iocs.csv`.
 
-Le trafic en clair documente le reste de la chaîne. Il est à rechercher en premier.
-
-```
-http.request
-```
-
-### Fenêtres sur le trafic chiffré
-
-Deux éléments d'une session TLS circulent en clair avant l'établissement du chiffrement.
-
-| Élément | Filtre | Apport |
+| Valeur | Rôle | Qualification |
 | --- | --- | --- |
-| Nom de serveur demandé | `tls.handshake.extensions_server_name` | Destination réelle d'une session chiffrée |
-| Certificat serveur | `tls.handshake.type == 11` | Émetteur, sujet, validité, caractère auto-signé |
+| `www.grinswakebthu.info` | Commande et contrôle | Malveillant, reçoit les requêtes POST |
+| `www.taibeinan.cc` | Commande et contrôle | Malveillant, reçoit les requêtes POST |
+| 172.64.155.76 | Leurre, réponses 301 ou 404, réseau de distribution de contenu | Non malveillant, non actionnable |
+| 172.67.162.153 | Destination signalée, réseau de distribution de contenu | Non actionnable |
+| 146.59.71.167, 38.182.168.246, 45.130.41.161, 121.54.163.148 | Destinations signalées par les alertes | Leurre ou contrôle, selon le domaine associé |
+| Requêtes HTTP à chemin court aléatoire vers de multiples domaines | Comportement de l'implant | Comportemental |
 
-### Inventaire puis pivot, dans cet ordre
+## Empreintes de fichiers
 
-Deux mouvements complémentaires, dont l'un ne remplace pas l'autre. L'inventaire précède
-le pivot.
+Aucun binaire n'a été extrait. Aucun téléchargement en clair n'a été observé.
 
-| Mouvement | Principe | Portée |
-| --- | --- | --- |
-| Inventaire | Lire la liste complète et dédoublonnée des domaines interrogés, des noms de serveur TLS et des objets HTTP | Fait apparaître ce qui n'était pas soupçonné |
-| Pivot | Partir d'un indicateur connu pour en obtenir un autre, par exemple `dns.a == <ip suspecte>` | Confirme et étend une piste existante |
+## Recommandations
 
-> Le pivot est borné par ce que l'analyste connaît déjà. Un site légitime compromis, ou
-> un élément hébergé derrière un service de distribution de contenu, présente une adresse
-> banale et n'est atteint que par l'inventaire.
-
-L'inventaire des objets HTTP se lit intégralement, y compris ses lignes apparemment
-banales. Un outil détourné sollicite fréquemment des domaines légitimes de son propre
-éditeur, ce qui permet d'établir sa famille sans recours à une signature.
-
-### Qualification par la position dans la séquence
-
-Certains éléments d'une chaîne ne présentent aucune caractéristique propre permettant de
-les qualifier. Ils ne se qualifient que par leur position temporelle.
-
-| Situation | Critère de qualification |
+| Priorité | Mesure |
 | --- | --- |
-| Deux résolutions DNS séparées de quelques secondes | Intervalle incompatible avec une saisie manuelle, donc enchaînement provoqué par le contenu de la première page |
-| Trafic en clair disponible | En-tête `Referer`, qui documente le lien explicitement |
-| Trafic chiffré | Corrélation temporelle seule, à annoncer comme telle dans le rapport |
+| Immédiate | Isolement du poste, réinstallation. |
+| Immédiate | Réinitialisation des mots de passe de tous les comptes utilisés depuis ce poste, révocation des sessions actives. |
+| Immédiate | Examen de la messagerie et des fichiers récents de l'utilisateur, à la recherche du fichier d'origine. |
+| Immédiate | Recherche rétroactive sur l'ensemble du parc de requêtes vers les deux domaines de contrôle, sur une période étendue en amont. |
+| À court terme | Blocage des deux domaines de contrôle au niveau de la résolution de noms. |
 
-> La chronologie n'est pas une mise en forme du rapport. C'est un instrument d'analyse.
-> Face à un élément suspect, examiner systématiquement ce qui le précède et le suit de
-> quelques secondes.
+Le blocage des destinations signalées n'est pas recommandé sans distinction préalable :
+bloquer un leurre interrompt l'accès à un site légitime sans effet sur l'infection.
 
-Une adjacence ne suffit pas. Elle doit être accompagnée d'un mécanisme plausible reliant
-les deux événements.
+## Limites de l'analyse
 
-| Question de validation | Si la réponse est non |
+| Point | Limite |
 | --- | --- |
-| Une étape de distribution existe elle entre les deux événements ? | Pas de chaîne établie |
-| Le délai est il compatible avec un téléchargement suivi d'une exécution ? | Simultanéité probable |
-| Le second événement est il un premier démarrage, ou le fonctionnement d'un implant déjà en place ? | L'infection est antérieure |
-
-> Une ouverture de session déclenche au même instant les programmes de démarrage et la
-> réouverture du navigateur. Deux événements simultanés à cet instant n'ont pas
-> nécessairement de lien. L'horodatage de l'authentification Kerberos du compte permet de
-> vérifier cette hypothèse.
-
-### Capture postérieure à l'infection
-
-Une capture déclenchée par une alerte commence au moment de l'alerte. Si le premier
-contact avec le serveur de contrôle correspond au fonctionnement d'un implant déjà
-opérationnel, sans téléchargement préalable, l'infection est antérieure à la collecte.
-Le vecteur initial est alors absent du trafic, et la recherche rétroactive doit être
-étendue en amont.
-
-Lorsque la capture couvre le démarrage du poste, la séquence transaction DHCP,
-authentification Kerberos, premier contact avec le serveur de contrôle se lit
-directement. Un implant qui s'active après ouverture de session sans téléchargement
-préalable établit l'existence d'un mécanisme de persistance, sans en révéler la nature.
-
-### Qualification d'un flux volumineux
-
-Le volume échangé avec un hôte ne constitue pas un critère de qualification. La
-vérification du nom présenté précède toute conclusion.
-
-| Observation | Vérification préalable |
-| --- | --- |
-| Transfert de volume inhabituel | Nom de serveur de la session TLS, ou en-tête `Host` en clair |
-| Origine identifiée comme légitime | Le flux n'est pas pour autant anodin |
-
-> Le critère pertinent n'est ni la taille du transfert ni la réputation de son origine,
-> mais l'absence de justification fonctionnelle. Un poste bureautique n'a aucune raison
-> de télécharger un environnement d'exécution, même depuis le site de son éditeur.
-
-### Vecteurs ne faisant transiter aucun fichier
-
-Certaines chaînes ne comportent aucune pièce jointe et n'exploitent aucune
-vulnérabilité. La commande initiale est saisie par l'utilisateur, à qui une page affiche
-une séquence de touches présentée comme une étape de validation.
-
-> La chaîne ne devient observable qu'à partir de la première requête sortante émise par
-> le code exécuté. En amont, seule la consultation du site compromis figure dans le
-> trafic, sans caractéristique distinctive.
-
-Le trafic réseau ne suffit pas à établir ce vecteur. L'examen du cache du navigateur
-permet de retrouver le script injecté et le site qui l'a servi.
-
-### Écart entre port et protocole
-
-Le protocole effectivement transporté se constate, il ne se déduit pas du numéro de port.
-
-> Du texte clair sur un port réservé au chiffrement, ou l'inverse, constitue un
-> indicateur en lui même. Le choix vise un filtrage autorisant le port sans inspecter son
-> contenu.
-
-### Exploitation des sorties structurées
-
-Suricata en mode hors ligne produit un journal d'événements structuré couvrant les flux,
-le DNS, le HTTP et le TLS, indépendamment de toute alerte.
-
-```bash
-jq -r 'select(.event_type=="tls") | .tls.sni' eve.json | sort -u
-```
-
-> Un moteur de signature teste la présence d'un motif. Il ne sait pas constater l'absence
-> d'un champ, ni la régularité temporelle d'une série d'événements. Ces deux classes
-> d'anomalie relèvent d'une requête sur données structurées, donc du SIEM.
-
-## Documentation de l'analyse
-
-Le journal d'analyse est ouvert avant la première commande et alimenté au fil de l'eau,
-hypothèses et pistes écartées comprises. Une analyse d'incident se restitue, et une
-reconstitution a posteriori ne conserve pas le cheminement.
-
-Convention d'horodatage : UTC, mention explicite en tête de document. Les outils
-n'appliquent pas tous le même réglage d'affichage par défaut, un écart entre deux
-sorties est à vérifier avant publication.
-
-### Degré d'affirmation
-
-| Terme | Emploi |
-| --- | --- |
-| Établi | La capture montre directement le fait |
-| Corroboré | Une observation indépendante soutient l'hypothèse |
-| Compatible | Aucune observation ne contredit l'hypothèse, aucune ne la soutient spécifiquement |
-| Hypothèse | Interprétation plausible, non vérifiée |
-
-> Un rapport d'incident peut être relu par un juriste, un assureur ou un auditeur. Les
-> termes absolus, irréfutable ou certain, n'y ont pas leur place.
-
-### Contrôle de cohérence des relevés
-
-Les valeurs relevées se recoupent entre elles : nombre de paquets, durée, fréquence des
-échanges, volume. Un écart significatif signale une erreur de relevé ou un comportement
-non encore compris.
-
-### Liste de contrôle avant de quitter la capture
-
-| Point | Vérification |
-| --- | --- |
-| Horodatages | Premier et dernier contact relevés pour chaque hôte malveillant identifié |
-| Rôles | Site compromis, distribution et commande et contrôle distingués et justifiés |
-| Affirmations | Chaque conclusion rattachée à une observation, les déductions annoncées comme telles |
-| Volumes | Distinction entre maintien de session et exfiltration établie sur les volumes observés, non sur la nature de l'outil |
-| Empreintes | Extraction tentée, absence justifiée le cas échéant |
-| Enrichissement externe | Source et date de consultation consignées. Aucun fichier issu d'un incident réel soumis à un service public |
-| Limites | Périmètre temporel et périmètre réseau de la capture explicités |
-
-> L'affirmation d'une exfiltration engage des obligations de notification. Elle suppose
-> une observation de volume ou de contenu.
-
-> La conclusion analytique énonce ce qui est démontré. La posture de réponse se fonde sur
-> le scénario le plus défavorable plausible. Un rapport expose les deux séparément : une
-> exfiltration non démontrée n'autorise pas à omettre la réinitialisation des accès.
-
-> Une analyse de référence se confronte à la capture comme toute autre source. Elle ne
-> constitue pas une autorité.
-
-> Une section vide et justifiée constitue un résultat. L'absence de preuve extractible
-> est une information à consigner.
+| Vecteur initial | Non établi. Infection antérieure corroborée, ouverture d'un fichier local non exclue. |
+| Sessions vers des domaines Microsoft | Classées comme services système. Une synchronisation de messagerie emprunterait des domaines de même éditeur, à exclure par examen des noms de serveur. |
+| Adresses des destinations signalées | Correspondance entre chaque adresse et son domaine non établie pour l'ensemble. |
+| Référence externe | Aucune analyse de référence disponible pour confrontation. |
